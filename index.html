@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mudassar BOT V1 — Session Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:      #050a0e;
+    --surface: #0c1419;
+    --border:  #1a2e3a;
+    --accent:  #00e5a0;
+    --accent2: #00b4d8;
+    --warn:    #ff6b35;
+    --text:    #c8d8e0;
+    --muted:   #4a6572;
+    --glow:    0 0 20px rgba(0,229,160,.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* ── Grid background ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Glow orbs ── */
+  body::after {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,160,.07) 0%, transparent 70%);
+    top: -200px; left: -200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .orb2 {
+    position: fixed;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,180,216,.06) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 520px;
+    padding: 40px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,229,160,.25);
+    padding: 4px 14px;
+    border-radius: 2px;
+    background: rgba(0,229,160,.05);
+  }
+
+  h1 {
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sub {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 340px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  /* ── Steps ── */
+  .steps {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    transition: all .3s;
+  }
+
+  .step.active .step-num {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  .step.done .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+
+  .step-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .05em;
+  }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-top: 14px;
+    max-width: 40px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ── Input ── */
+  .field { display: flex; flex-direction: column; gap: 8px; }
+
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .08em;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  .prefix {
+    padding: 0 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    border-right: 1px solid var(--border);
+    height: 44px;
+    display: flex; align-items: center;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    height: 44px;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 0 14px;
+    letter-spacing: .05em;
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  /* ── Button ── */
+  .btn {
+    height: 46px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #00ffb3;
+    box-shadow: 0 0 24px rgba(0,229,160,.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 100%;
+  }
+
+  .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── Pair code display ── */
+  .pair-code-box {
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed rgba(0,229,160,.3);
+    border-radius: 3px;
+    background: rgba(0,229,160,.03);
+  }
+
+  .pair-code-label {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .pair-code {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .2em;
+    text-shadow: 0 0 20px rgba(0,229,160,.4);
+  }
+
+  .pair-code-hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Session output ── */
+  .session-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .session-id {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    word-break: break-all;
+    max-height: 100px;
+    overflow-y: auto;
+    line-height: 1.6;
+    user-select: all;
+  }
+
+  .copy-btn {
+    height: 38px;
+    background: rgba(0,180,216,.1);
+    border: 1px solid rgba(0,180,216,.3);
+    border-radius: 3px;
+    color: var(--accent2);
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  .copy-btn:hover { background: rgba(0,180,216,.2); box-shadow: 0 0 12px rgba(0,180,216,.2); }
+  .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Loading ── */
+  .loader {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(0,0,0,.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Alert ── */
+  .alert {
+    padding: 12px 14px;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: 'Space Mono', monospace;
+    display: none;
+  }
+
+  .alert.show { display: block; }
+  .alert-error { background: rgba(255,107,53,.08); border: 1px solid rgba(255,107,53,.3); color: #ff6b35; }
+  .alert-info  { background: rgba(0,229,160,.05); border: 1px solid rgba(0,229,160,.2); color: var(--accent); }
+
+  /* ── Instructions ── */
+  .instructions {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 28px;
+  }
+
+  .instructions h3 {
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+  }
+
+  .instr-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .instr-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .instr-list li .n {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 11px;
+    min-width: 20px;
+    padding-top: 2px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    position: relative; z-index: 1;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 24px;
+    letter-spacing: .05em;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Transitions ── */
+  .panel { display: none; }
+  .panel.visible { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 24px 16px 60px; }
+    .card { padding: 20px; }
+    .pair-code { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb2"></div>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Session Generator</div>
+    <h1>Mudassar BOT V1</h1>
+    <p class="sub">Connect your WhatsApp to get a session ID. No QR code needed — just enter your number and link with a pair code.</p>
+  </header>
+
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step active" id="s1">
+      <div class="step-num">01</div>
+      <div class="step-label">Number</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="s2">
+      <div class="step-num">02</div>
+      <div class="step-label">Pair Code</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="s3">
+      <div class="step-num">03</div>
+      <div class="step-label">Session</div>
+    </div>
+  </div>
+
+  <!-- Panel 1: Enter number -->
+  <div class="card" id="panel1">
+    <div class="card-title">// Enter your WhatsApp number</div>
+    <div class="field">
+      <label>PHONE NUMBER</label>
+      <div class="input-wrap">
+        <span class="prefix">+</span>
+        <input type="text" id="phoneInput" placeholder="923001234567" maxlength="15"/>
+      </div>
+    </div>
+    <div id="alert1" class="alert alert-error"></div>
+    <button class="btn btn-primary" id="getCodeBtn" onclick="requestPairCode()">
+      Get Pair Code
+    </button>
+  </div>
+
+  <!-- Panel 2: Show pair code, waiting -->
+  <div class="card panel" id="panel2">
+    <div class="card-title">// Enter this code in WhatsApp</div>
+    <div class="pair-code-box">
+      <div class="pair-code-label">Your Pair Code</div>
+      <div class="pair-code" id="pairCodeDisplay">——————</div>
+      <div class="pair-code-hint">
+        Open WhatsApp → <b>Linked Devices</b> → <b>Link a Device</b><br/>
+        Tap <b>"Link with phone number instead"</b> and enter the code above
+      </div>
+    </div>
+    <div class="alert alert-info show" id="waitingAlert">
+      ⏳ Waiting for you to confirm in WhatsApp... (up to 2 minutes)
+    </div>
+    <div id="alert2" class="alert alert-error"></div>
+    <button class="btn btn-ghost" onclick="resetAll()">← Start Over</button>
+  </div>
+
+  <!-- Panel 3: Session ready -->
+  <div class="card panel" id="panel3">
+    <div class="card-title">// Session Generated ✓</div>
+    <div class="alert alert-info show">
+      ✅ WhatsApp connected! Copy your Session ID below.
+    </div>
+    <div class="session-box">
+      <div class="field">
+        <label>SESSION ID — paste this into your bot's SESSION_ID variable</label>
+        <div class="session-id" id="sessionIdDisplay"></div>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copySession()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Session ID
+      </button>
+    </div>
+    <button class="btn btn-ghost" onclick="resetAll()">Generate Another</button>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <h3>// How to use your session</h3>
+    <ul class="instr-list">
+      <li><span class="n">01</span><span>Generate your session ID using the form above</span></li>
+      <li><span class="n">02</span><span>Copy the <b>SESSION_ID</b> value</span></li>
+      <li><span class="n">03</span><span>In your bot's <code>settings.js</code>, set <code>SESSION_ID: 'paste_here'</code></span></li>
+      <li><span class="n">04</span><span>Deploy the bot to your panel (Koyeb, bot-hosting.net, Katabump)</span></li>
+      <li><span class="n">05</span><span>The bot auto-loads the session on startup — no pair code needed again</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  Mudassar BOT V1 &nbsp;·&nbsp; Built with Baileys &nbsp;·&nbsp;
+  <a href="https://github.com/WhiskeySockets/Baileys" target="_blank">Baileys ↗</a>
+</footer>
+
+<script>
+  let sessionId = '';
+
+  function setStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById('s' + i);
+      el.classList.remove('active', 'done');
+      if (i < n)  el.classList.add('done');
+      if (i === n) el.classList.add('active');
+    }
+  }
+
+  function showPanel(id) {
+    ['panel1','panel2','panel3'].forEach(p => {
+      document.getElementById(p).classList.remove('visible');
+    });
+    document.getElementById(id).classList.add('visible');
+  }
+
+  // Make panel1 visible by default via JS (not CSS)
+  document.getElementById('panel1').classList.add('visible');
+
+  async function requestPairCode() {
+    const phone = document.getElementById('phoneInput').value.trim().replace(/[^0-9]/g, '');
+    const alertEl = document.getElementById('alert1');
+    alertEl.className = 'alert alert-error';
+    alertEl.textContent = '';
+
+    if (!phone || phone.length < 7) {
+      alertEl.textContent = 'Please enter a valid phone number with country code.';
+      alertEl.classList.add('show');
+      return;
+    }
+
+    const btn = document.getElementById('getCodeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span> Connecting...';
+
+    try {
+      const res  = await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to connect');
+      }
+
+      // Show pair code
+      document.getElementById('pairCodeDisplay').textContent = data.pairCode || '——';
+      sessionId = data.sessionId || '';
+
+      setStep(2);
+      showPanel('panel2');
+
+      // If session already came back with the response (fast path)
+      if (sessionId) {
+        setTimeout(() => showSessionReady(), 800);
+      }
+
+    } catch (err) {
+      alertEl.textContent = '❌ ' + err.message;
+      alertEl.classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = 'Get Pair Code';
+    }
+  }
+
+  function showSessionReady() {
+    document.getElementById('sessionIdDisplay').textContent = sessionId;
+    setStep(3);
+    showPanel('panel3');
+  }
+
+  function copySession() {
+    if (!sessionId) return;
+    navigator.clipboard.writeText(sessionId).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg> Copied!`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"/></svg> Copy Session ID`;
+      }, 2500);
+    });
+  }
+
+  function resetAll() {
+    sessionId = '';
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('pairCodeDisplay').textContent = '——————';
+    document.getElementById('sessionIdDisplay').textContent = '';
+    const a1 = document.getElementById('alert1');
+    a1.className = 'alert alert-error';
+    a1.textContent = '';
+    const btn = document.getElementById('getCodeBtn');
+    btn.disabled = false;
+    btn.innerHTML = 'Get Pair Code';
+    setStep(1);
+    showPanel('panel1');
+  }
+
+  // Enter key triggers submit
+  document.getElementById('phoneInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') requestPairCode();
+  });
+</script>
+</body>
+</html>

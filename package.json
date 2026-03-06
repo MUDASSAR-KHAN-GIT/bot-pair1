@@ -1,0 +1,14 @@
+{
+  "name": "mudassar-bot-session",
+  "version": "1.0.0",
+  "description": "Session generator for Mudassar BOT V1",
+  "main": "api/pair.js",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "pino": "^9.5.0",
+    "node-cache": "^5.1.2"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
